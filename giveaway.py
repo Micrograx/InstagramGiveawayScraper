@@ -1,4 +1,6 @@
-import os, time, random
+import os
+import time
+import random
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from secrets import LOGIN, PASSWORD
@@ -101,7 +103,7 @@ class Giveaway:
         return people
 
     def check_if_liked(self, ppl_commented, ppl_like):
-        people_to_chose =set()
+        people_to_chose = set()
         for guy in ppl_commented:
             if guy in ppl_like:
                 people_to_chose.add(guy)
@@ -110,14 +112,14 @@ class Giveaway:
     def pick_winners(self, people, number_of_winners):
         people = list(people)
         random.shuffle(people)
-        for number in range(1, number_of_winners+1):
-            print(f'Winne number {number} is {people.pop()}')
+        for number in range(1, number_of_winners + 1):
+            print(f'Winner number {number} is {people.pop()}')
             time.sleep(1)
 
 
 if __name__ == '__main__':
     giveaway_people = ['@jakobowsky', '@someone']
-    ig = Giveaway(LOGIN, PASSWORD, give_away_people)
+    ig = Giveaway(LOGIN, PASSWORD, giveaway_people)
     print("Logged in...")
     ig.login()
     print("Getting people who commented and tagged 2 friends...")
