@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import random
 from selenium import webdriver
@@ -16,10 +17,11 @@ class Giveaway:
         self.path = f'{os.getcwd()}/chromedriver'
         mobile_emulation = {
             "deviceMetrics": {"width": 360, "height": 640, "pixelRatio": 3.0},
-            "userAgent": "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"}
+            "userAgent": "Mozilla/5.0 (Linux; Android 4.2.1; en-us; Nexus 5 Build/JOP40D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
+        }
         chrome_options = Options()
         chrome_options.add_experimental_option("mobileEmulation", mobile_emulation)
-        self.driver = webdriver.Chrome(self.path, chrome_options=chrome_options)
+        self.driver = webdriver.Chrome(self.path, options=chrome_options)
 
     def login(self):
         driver = self.driver
@@ -39,19 +41,34 @@ class Giveaway:
     def get_comments(self):
         self.driver.get('https://www.instagram.com/p/B4NssH8iVmJ/comments/')
         time.sleep(1)
+        working = 0
         while True:
             try:
                 button = self.driver.find_element_by_xpath(BTN_MORE_COMMENTS)
                 button.click()
                 time.sleep(1)
-            except Exception:
-                print("Got all comments!")
-                break
-        comments = self.driver.find_elements_by_class_name(CLASS_COMMENT)
+            except EXCEPTION_NO_ELEMENT:
+                if working == 0:
+                    sys.exit("Error on BTN_MORE_COMMENTS constant")
+                else:
+                    print("Got all comments!")
+                    break
+            working = 1
+
+        try:
+            comments = self.driver.find_elements_by_class_name(CLASS_COMMENT)
+        except EXCEPTION_NO_ELEMENT:
+            sys.exit("Error on CLASS_COMMENT constant")
+
         comments_list, users_list = [], []
         for comment in comments:
             ig_comment = comment.find_element_by_css_selector('span').get_attribute('textContent')
-            ig_user = comment.find_element_by_class_name(CLASS_COMMENT_USERNAME).get_attribute('textContent')
+
+            try: 
+                ig_user = comment.find_element_by_class_name(CLASS_COMMENT_USERNAME).get_attribute('textContent')
+            except EXCEPTION_NO_ELEMENT:
+                sys.exit("Error on CLASS_COMMENT_USERNAME constant")
+
             comments_list.append(ig_comment)
             users_list.append(ig_user)
         comments_list = comments_list[1:]
@@ -77,19 +94,32 @@ class Giveaway:
 
     def get_people_who_liked(self):
         self.driver.get("https://www.instagram.com/p/B4NssH8iVmJ")
-        link_to_likes = self.driver.find_element_by_xpath(BTN_ALL_LIKESd)
+        try:
+            link_to_likes = self.driver.find_element_by_xpath(BTN_ALL_LIKES)
+        except EXCEPTION_NO_ELEMENT:
+            sys.exit("Error on BTN_ALL_LIKES constant")
         link_to_likes.click()
         time.sleep(2)
-        current = len(self.driver.find_element_by_xpath(XPATH_SINLGE_COMMENT).find_elements_by_tag_name('a'))
+        try:
+            current = len(self.driver.find_element_by_xpath(XPATH_SINLGE_COMMENT).find_elements_by_tag_name('a'))
+        except EXCEPTION_NO_ELEMENT:
+            sys.exit("Error on XPATH_SINGLE_COMMENT constant")
+
         while True:
             self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(random.randint(1, 2))
-            new = len(self.driver.find_element_by_xpath(XPATH_SINLGE_COMMENT).find_elements_by_tag_name('a'))
+            try:
+                new = len(self.driver.find_element_by_xpath(XPATH_SINLGE_COMMENT).find_elements_by_tag_name('a'))
+            except EXCEPTION_NO_ELEMENT:
+                sys.exit("Error on XPATH_SINGLE_COMMENT constant")
             if new == current:
                 print("Got all likes...")
                 break
             current = new
-        all_links = self.driver.find_element_by_xpath(XPATH_SINLGE_COMMENT).find_elements_by_tag_name('a')
+        try:
+            all_links = self.driver.find_element_by_xpath(XPATH_SINLGE_COMMENT).find_elements_by_tag_name('a')
+        except EXCEPTION_NO_ELEMENT:
+            sys.exit("Error on XPATH_SINGLE_COMMENT constant")
         people = self.extract_likes(all_links)
         return people
 
