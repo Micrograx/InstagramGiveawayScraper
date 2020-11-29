@@ -3,7 +3,7 @@ from secrets import LOGIN, PASSWORD
 import time
 import sys
 import getopt
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Pipe
 
 
 def main(argv):
@@ -47,28 +47,32 @@ def main(argv):
 
     print("Likes amm: {}".format(n_likes))
     print("Comms amm: {}".format(n_comments))
+    likes_parent, likes_child = Pipe()
+    comms_parent, comms_child = Pipe()
+
+    likes = []
+    comms = []
 
     if (require_comments and require_likes):
-        process_l = []
 
-        likes = Queue()
-        p_likes = Process(target=get_likes, args=(likes,))
-        if (require_likes):
-            p_likes.start()
-            process_l.append(p_likes)
+        proc_like = Process(target=get_likes, args=(likes_child,))
+        proc_like.start()
 
-        comments = Queue()
-        p_comms = Process(target=get_comments, args=(comments, tag_ammount))
-        if (require_comments):
-            p_comms.start()
-            process_l.append(p_comms)
+        proc_comm = Process(target=get_comments, args=(comms_child, tag_ammount))
+        proc_comm.start()
 
-        for p in process_l:
-            p.join()
+        likes = likes_parent.recv()
+        comms = comms_parent.recv()
+
+        proc_like.join()
+        proc_comm.join()
+
     elif(require_comments):
-        comments = ig.get_comments()
+        comms = ig.get_comments()
+        likes = comms
     elif(require_likes):
         likes = ig.get_people_who_liked()
+        comms = likes
 
 
     # people_to_chose = ig.check_if_liked(people_who_commented, people_who_liked)
@@ -80,24 +84,26 @@ def main(argv):
     # ig.close_browser()
 
 
-def get_likes(q):
+def get_likes(pipe):
     ig = Giveaway(LOGIN, PASSWORD, [])
     ig.login()
     print("Logged in... (Likes Thread)")
     print('Getting people who liked post...')
     people_who_liked = ig.get_people_who_liked()
     time.sleep(1)
-    q.put(people_who_liked)
+    pipe.send(people_who_liked)
+    pipe.close()
 
 
-def get_comments(q, tags):
+def get_comments(pipe, tags):
     ig = Giveaway(LOGIN, PASSWORD, [])
     ig.login()
     print("Logged in... (Comments Thread)")
     print('Getting people who commented and tagged {} friends in the post'.format(tags))
     people_who_commented = ig.get_comments()
     time.sleep(1)
-    q.put(people_who_commented)
+    pipe.send(people_who_commented)
+    pipe.close()
 
 
 if __name__ == '__main__':
