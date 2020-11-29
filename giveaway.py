@@ -102,21 +102,14 @@ class Giveaway:
         time.sleep(2)
         try:
             current = len(self.driver.find_element_by_xpath(XPATH_SINLGE_COMMENT).find_elements_by_tag_name('a'))
-        except EXCEPTION_NO_ELEMENT:
-            sys.exit("Error on XPATH_SINGLE_COMMENT constant")
-
-        while True:
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(random.randint(1, 2))
-            try:
+            while True:
+                self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(random.randint(1, 2))
                 new = len(self.driver.find_element_by_xpath(XPATH_SINLGE_COMMENT).find_elements_by_tag_name('a'))
-            except EXCEPTION_NO_ELEMENT:
-                sys.exit("Error on XPATH_SINGLE_COMMENT constant")
-            if new == current:
-                print("Got all likes...")
-                break
-            current = new
-        try:
+                if new == current:
+                    print("Got all likes...")
+                    break
+                current = new
             all_links = self.driver.find_element_by_xpath(XPATH_SINLGE_COMMENT).find_elements_by_tag_name('a')
         except EXCEPTION_NO_ELEMENT:
             sys.exit("Error on XPATH_SINGLE_COMMENT constant")
