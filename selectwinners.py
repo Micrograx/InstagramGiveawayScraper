@@ -9,18 +9,19 @@ import random
 
 def main(argv):
 
+    post_link = ""
+
     allow_duplicates = False
-    tag_ammount = 0
     require_likes = False
     require_comments = False
     excluded_accounts = []
-    post_link = ""
+    tag_ammount = 0
     winners_ammount = 1
 
     try:
         opts, args = getopt.getopt(argv, "hdt:lce:p:w:", ["tags=", "excluded=", "help", "post=", "winners="])
     except getopt.GetoptError:
-        print('selectwinners.py -t <Ammount of tag per comment> -e <Usernames excluded>')
+        print('selectwinners.py -p <Post link> -e <Usernames excluded>')
         sys.exit(2)
 
     for opt, arg in opts:
@@ -42,6 +43,13 @@ def main(argv):
             post_link = arg
         elif opt in ("-w", "--winners"):
             winners_ammount = int(arg)
+
+    if (post_link == ""):
+        print("Usage: selectwinners.py -p <Post Link>")
+        sys.exit(2)
+    if (not require_likes and not require_comments):
+        print("You need to set -c or -l or both")
+        sys.exit(2)
 
     likes_parent, likes_child = Pipe()
     comms_parent, comms_child = Pipe()
