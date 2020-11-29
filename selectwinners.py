@@ -76,7 +76,7 @@ def main(argv):
         print("Logged in...")
 
         if(require_comments):
-            print('Getting people who commented and tagged {} friends in the post'.format(tag_ammount))
+            print('Getting people who commented and tagged {} friends'.format(tag_ammount))
             comms = ig.get_comments()
             likes = comms
         elif(require_likes):
@@ -94,12 +94,14 @@ def main(argv):
     
     people_to_chose = [x for x in people_to_chose if x not in excluded_accounts]
 
-    print(people_to_chose)
-
     print(f"There is {len(people_to_chose)} people...")
 
     print(f"Picking winners...")
-    winners = random.sample(people_to_chose, winners_ammount)
+    if (winners_ammount < len(people_to_chose)):
+        winners = random.sample(people_to_chose, winners_ammount)
+    else:
+        winners = people_to_chose
+
     for w in winners:
         print("Congratulations: @{}".format(w))
     
