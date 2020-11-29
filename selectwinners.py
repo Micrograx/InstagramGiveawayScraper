@@ -14,9 +14,10 @@ def main(argv):
     require_comments = False
     excluded_accounts = []
     post_link = ""
+    winners_ammount = 1
 
     try:
-        opts, args = getopt.getopt(argv, "hdt:lce:p:", ["tags=", "excluded=", "help", "post="])
+        opts, args = getopt.getopt(argv, "hdt:lce:p:w:", ["tags=", "excluded=", "help", "post=", "winners="])
     except getopt.GetoptError:
         print('selectwinners.py -t <Ammount of tag per comment> -e <Usernames excluded>')
         sys.exit(2)
@@ -34,9 +35,12 @@ def main(argv):
         elif opt == "-c":
             require_comments = True
         elif opt in ("-e", "--excluded"):
-            excluded_accounts = arg
+            excluded_accounts = arg.split(',')
+            print(excluded_accounts)
         elif opt in ("-p", "--post"):
             post_link = arg
+        elif opt in ("-w", "--winners"):
+            winners_ammount = arg
 
     ig = Giveaway(LOGIN, PASSWORD, excluded_accounts)
     ig.login()
