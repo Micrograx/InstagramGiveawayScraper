@@ -4,7 +4,6 @@ import time
 import random
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from secrets import LOGIN, PASSWORD
 from constants import *
 import re
 
@@ -71,6 +70,7 @@ class Giveaway:
 
             comments_list.append(ig_comment)
             users_list.append(ig_user)
+
         comments_list = comments_list[1:]
         users_list = users_list[1:]
         profiles = self.check_comments(users_list, comments_list)
@@ -137,23 +137,3 @@ class Giveaway:
         for number in range(1, number_of_winners + 1):
             print(f'Winner number {number} is {people.pop()}')
             time.sleep(1)
-
-
-if __name__ == '__main__':
-    giveaway_people = ['@jakobowsky', '@someone']
-    ig = Giveaway(LOGIN, PASSWORD, giveaway_people)
-    print("Logged in...")
-    ig.login()
-    print("Getting people who commented and tagged 2 friends...")
-    people_who_commented = ig.get_comments()
-    time.sleep(1)
-    print('Getting people who liked post...')
-    people_who_liked = ig.get_people_who_liked()
-    time.sleep(1)
-    people_to_chose = ig.check_if_liked(people_who_commented, people_who_liked)
-    print(f"There is {len(people_to_chose)} people...")
-    time.sleep(1)
-    print(f"Picking winners...")
-    ig.pick_winners(people_to_chose, 4)
-    print('Congratulations!')
-    ig.close_browser()
