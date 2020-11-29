@@ -9,8 +9,7 @@ import re
 
 
 class Giveaway:
-    def __init__(self, username, password, give_away_people):
-        self.give_away_people = give_away_people
+    def __init__(self, username, password, tag_amm, post_link):
         self.username = username
         self.password = password
         self.path = f'{os.getcwd()}/chromedriver'
@@ -21,6 +20,8 @@ class Giveaway:
         chrome_options = Options()
         chrome_options.add_experimental_option("mobileEmulation", mobile_emulation)
         self.driver = webdriver.Chrome(self.path, options=chrome_options)
+        self.tag_ammount = tag_amm
+        self.post_link = post_link
 
     def login(self):
         driver = self.driver
@@ -38,7 +39,7 @@ class Giveaway:
         self.driver.close()
 
     def get_comments(self):
-        self.driver.get('https://www.instagram.com/p/B4NssH8iVmJ/comments/')
+        self.driver.get(self.post_link + '/comments/')
         time.sleep(1)
         working = 0
         while True:
@@ -78,12 +79,7 @@ class Giveaway:
 
     def good_comment(self, comment):
         users = re.findall(r'@[\w\.-]+', comment)
-        if len(users) > 1:
-            for user in users:
-                if user in self.give_away_people:
-                    return False
-                return True
-        return False
+        return len(users) >= self.tag_ammount
 
     def check_comments(self, users_list, comments_list):
         profiles = []
@@ -93,7 +89,7 @@ class Giveaway:
         return profiles
 
     def get_people_who_liked(self):
-        self.driver.get("https://www.instagram.com/p/B4NssH8iVmJ")
+        self.driver.get(self.post_link)
         try:
             link_to_likes = self.driver.find_element_by_xpath(BTN_ALL_LIKES)
         except EXCEPTION_NO_ELEMENT:
@@ -124,13 +120,6 @@ class Giveaway:
                 people.add(current)
         return people
 
-    def check_if_liked(self, ppl_commented, ppl_like):
-        people_to_chose = set()
-        for guy in ppl_commented:
-            if guy in ppl_like:
-                people_to_chose.add(guy)
-        return people_to_chose
-
     def pick_winners(self, people, number_of_winners):
         people = list(people)
         random.shuffle(people)
@@ -138,8 +127,8 @@ class Giveaway:
             print(f'Winner number {number} is {people.pop()}')
             time.sleep(1)
 
-    def get_number_likes(self, post_link):
-        self.driver.get("https://www.instagram.com/p/B4NssH8iVmJ")
+    def get_number_likes(self):
+        self.driver.get(post_link)
         time.sleep(2)
         try:
             ammount_of_likes = self.driver.find_element_by_xpath(XPATH_NUMBER_LIKES).get_attribute('textContent')

@@ -70,17 +70,22 @@ def main(argv):
 
         proc_like.join()
         proc_comm.join()
+    else:
+        ig = Giveaway(LOGIN, PASSWORD, tag_ammount, post_link)
+        ig.login()
+        print("Logged in...")
 
-    elif(require_comments):
-        ig = Giveaway(LOGIN, PASSWORD, excluded_accounts)
-        ig.login()
-        comms = ig.get_comments()
-        likes = comms
-    elif(require_likes):
-        ig = Giveaway(LOGIN, PASSWORD, excluded_accounts)
-        ig.login()
-        likes = ig.get_people_who_liked()
-        comms = likes
+        if(require_comments):
+            print('Getting people who commented and tagged {} friends in the post'.format(tag_ammount))
+            comms = ig.get_comments()
+            likes = comms
+        elif(require_likes):
+            print('Getting people who liked post...')
+            likes = ig.get_people_who_liked()
+            comms = likes
+
+        ig.close_browser()
+
 
     if (allow_duplicates):
         people_to_chose = [x for x in comms if x in likes]
@@ -97,13 +102,11 @@ def main(argv):
     winners = random.sample(people_to_chose, winners_ammount)
     for w in winners:
         print("Congratulations: @{}".format(w))
-
-    print('Congratulations!')
-    ig.close_browser()
+    
 
 
-def get_likes(pipe):
-    ig = Giveaway(LOGIN, PASSWORD, [])
+def get_likes(pipe, post_link):
+    ig = Giveaway(LOGIN, PASSWORD, 0, post_link)
     ig.login()
     print("Logged in... (Likes Thread)")
     print('Getting people who liked post...')
@@ -114,8 +117,8 @@ def get_likes(pipe):
     ig.close_browser()
 
 
-def get_comments(pipe, tags):
-    ig = Giveaway(LOGIN, PASSWORD, [])
+def get_comments(pipe, tags, post_link):
+    ig = Giveaway(LOGIN, PASSWORD, tags, post_link)
     ig.login()
     print("Logged in... (Comments Thread)")
     print('Getting people who commented and tagged {} friends in the post'.format(tags))
