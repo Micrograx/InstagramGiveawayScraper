@@ -4,6 +4,7 @@ import time
 import sys
 import getopt
 from multiprocessing import Process, Pipe
+import random
 
 
 def main(argv):
@@ -29,7 +30,7 @@ def main(argv):
         elif opt == "-d":
             allow_duplicates = True
         elif opt in ("-t", "--tags"):
-            tag_ammount = arg
+            tag_ammount = int(arg)
         elif opt == "-l":
             require_likes = True
         elif opt == "-c":
@@ -40,7 +41,7 @@ def main(argv):
         elif opt in ("-p", "--post"):
             post_link = arg
         elif opt in ("-w", "--winners"):
-            winners_ammount = arg
+            winners_ammount = int(arg)
 
     likes_parent, likes_child = Pipe()
     comms_parent, comms_child = Pipe()
@@ -85,6 +86,9 @@ def main(argv):
     print(f"There is {len(people_to_chose)} people...")
 
     print(f"Picking winners...")
+    winners = random.sample(people_to_chose, winners_ammount)
+    for w in winners:
+        print("Congratulations: @{}".format(w))
 
     print('Congratulations!')
     ig.close_browser()
