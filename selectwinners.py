@@ -42,15 +42,6 @@ def main(argv):
         elif opt in ("-w", "--winners"):
             winners_ammount = arg
 
-    ig = Giveaway(LOGIN, PASSWORD, excluded_accounts)
-    ig.login()
-    n_likes = int(ig.get_number_likes(post_link))
-    n_comments = n_likes * 2
-
-    print("Logged in...")
-
-    print("Likes amm: {}".format(n_likes))
-    print("Comms amm: {}".format(n_comments))
     likes_parent, likes_child = Pipe()
     comms_parent, comms_child = Pipe()
 
@@ -72,9 +63,13 @@ def main(argv):
         proc_comm.join()
 
     elif(require_comments):
+        ig = Giveaway(LOGIN, PASSWORD, excluded_accounts)
+        ig.login()
         comms = ig.get_comments()
         likes = comms
     elif(require_likes):
+        ig = Giveaway(LOGIN, PASSWORD, excluded_accounts)
+        ig.login()
         likes = ig.get_people_who_liked()
         comms = likes
 
