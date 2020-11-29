@@ -15,6 +15,9 @@ CLASS_COMMENT_USERNAME = "_6lAjh"
 
 # ---------------   LIKES GATHERING   ---------------
 
+# Ammount of Likes
+XPATH_NUMBER_LIKES = '//*[@id="react-root"]/section/main/div/div/article/div[3]/section[2]/div/div/a/span'
+
 # Link to likes XPath:
 BTN_ALL_LIKES = '//*[@id="react-root"]/section/main/div/div/article/div[3]/section[2]/div/div/a'
 

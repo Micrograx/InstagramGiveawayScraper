@@ -137,3 +137,12 @@ class Giveaway:
         for number in range(1, number_of_winners + 1):
             print(f'Winner number {number} is {people.pop()}')
             time.sleep(1)
+
+    def get_number_likes(self, post_link):
+        self.driver.get("https://www.instagram.com/p/B4NssH8iVmJ")
+        time.sleep(2)
+        try:
+            ammount_of_likes = self.driver.find_element_by_xpath(XPATH_NUMBER_LIKES).get_attribute('textContent')
+        except EXCEPTION_NO_ELEMENT:
+            sys.exit("Error on XPATH_NUMBER_LIKES constant")
+        return ammount_of_likes
