@@ -73,14 +73,21 @@ def main(argv):
         likes = ig.get_people_who_liked()
         comms = likes
 
+    if (allow_duplicates):
+        people_to_chose = [x for x in comms if x in likes]
+    else:
+        people_to_chose = list(set(comms) & set(likes))
+    
+    people_to_chose = [x for x in people_to_chose if x not in excluded_accounts]
 
-    # people_to_chose = ig.check_if_liked(people_who_commented, people_who_liked)
-    # print(f"There is {len(people_to_chose)} people...")
-    # time.sleep(1)
-    # print(f"Picking winners...")
-    # ig.pick_winners(people_to_chose, 4)
-    # print('Congratulations!')
-    # ig.close_browser()
+    print(people_to_chose)
+
+    print(f"There is {len(people_to_chose)} people...")
+
+    print(f"Picking winners...")
+
+    print('Congratulations!')
+    ig.close_browser()
 
 
 def get_likes(pipe):
@@ -92,6 +99,7 @@ def get_likes(pipe):
     time.sleep(1)
     pipe.send(people_who_liked)
     pipe.close()
+    ig.close_browser()
 
 
 def get_comments(pipe, tags):
@@ -103,6 +111,7 @@ def get_comments(pipe, tags):
     time.sleep(1)
     pipe.send(people_who_commented)
     pipe.close()
+    ig.close_browser()
 
 
 if __name__ == '__main__':
