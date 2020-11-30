@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from constants import *
 import re
+import bcolors
 
 
 class Giveaway:
@@ -76,6 +77,7 @@ class Giveaway:
         comments_list = comments_list[1:]
         users_list = users_list[1:]
         comments_tuple = self.check_comments(users_list, comments_list)
+        print(f"There are {bcolors.WARNING}{len(comments_tuple)} comments {bcolors.ENDC}in the post")
         return comments_tuple
 
     def good_comment(self, comment):
@@ -93,6 +95,13 @@ class Giveaway:
 
     def get_people_who_liked(self):
         self.driver.get(self.post_link)
+
+        try:
+            ammount_of_likes = self.driver.find_element_by_xpath(XPATH_NUMBER_LIKES).get_attribute('textContent')
+        except EXCEPTION_NO_ELEMENT:
+            sys.exit("Error on XPATH_NUMBER_LIKES constant")
+        print(f"There should be {bcolors.WARNING}{ammount_of_likes} likes{bcolors.ENDC}")
+
         try:
             link_to_likes = self.driver.find_element_by_xpath(BTN_ALL_LIKES)
         except EXCEPTION_NO_ELEMENT:
@@ -113,6 +122,7 @@ class Giveaway:
         except EXCEPTION_NO_ELEMENT:
             sys.exit("Error on XPATH_SINGLE_COMMENT constant")
         people = self.extract_likes(all_links)
+        print(f"There are {bcolors.WARNING}{len(people)} likes {bcolors.ENDC}in the post")
         return people
 
     def extract_likes(self, all_links):
