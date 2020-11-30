@@ -40,25 +40,26 @@ class Giveaway:
 
     def get_comments(self):
         self.driver.get(self.post_link + '/comments/')
-        time.sleep(1)
-        working = 0
+        time.sleep(2)
+        old_len = 0
+        comments = []
         while True:
             try:
+                comments = self.driver.find_elements_by_class_name(CLASS_COMMENT)
                 button = self.driver.find_element_by_xpath(BTN_MORE_COMMENTS)
                 button.click()
-                time.sleep(1)
-            except EXCEPTION_NO_ELEMENT:
-                if working == 0:
-                    sys.exit("Error on BTN_MORE_COMMENTS constant")
-                else:
+                time.sleep(random.randint(1,2))
+                cant = len(comments)
+                if cant == old_len:
                     print("Got all comments!")
                     break
-            working = 1
+                else:
+                    old_len = cant
+                    
+            except Exception:
+                print("Got all comments!")
+                break
 
-        try:
-            comments = self.driver.find_elements_by_class_name(CLASS_COMMENT)
-        except EXCEPTION_NO_ELEMENT:
-            sys.exit("Error on CLASS_COMMENT constant")
 
         comments_list, users_list = [], []
         for comment in comments:
@@ -74,8 +75,8 @@ class Giveaway:
 
         comments_list = comments_list[1:]
         users_list = users_list[1:]
-        profiles = self.check_comments(users_list, comments_list)
-        return profiles
+        comments_tuple = self.check_comments(users_list, comments_list)
+        return comments_tuple
 
     def good_comment(self, comment):
         users = re.findall(r'@[\w\.-]+', comment)
@@ -83,10 +84,12 @@ class Giveaway:
 
     def check_comments(self, users_list, comments_list):
         profiles = []
+        comments = []
         for user, comment in zip(users_list, comments_list):
             if self.good_comment(comment):
                 profiles.append(user)
-        return profiles
+                comments.append(comment)
+        return set(zip(profiles, comments))
 
     def get_people_who_liked(self):
         self.driver.get(self.post_link)

@@ -14,7 +14,7 @@ def main(argv):
     allow_duplicates = False
     require_likes = False
     require_comments = False
-    excluded_accounts = []
+    excluded_accounts = set()
     tag_ammount = 0
     winners_ammount = 1
 
@@ -37,7 +37,8 @@ def main(argv):
         elif opt == "-c":
             require_comments = True
         elif opt in ("-e", "--excluded"):
-            excluded_accounts = arg.split(',')
+            for x in arg.split(','):
+                excluded_accounts.add(x)
             print(excluded_accounts)
         elif opt in ("-p", "--post"):
             post_link = arg
@@ -59,10 +60,10 @@ def main(argv):
 
     if (require_comments and require_likes):
 
-        proc_like = Process(target=get_likes, args=(likes_child,))
+        proc_like = Process(target=get_likes, args=(likes_child,post_link))
         proc_like.start()
 
-        proc_comm = Process(target=get_comments, args=(comms_child, tag_ammount))
+        proc_comm = Process(target=get_comments, args=(comms_child, tag_ammount, post_link))
         proc_comm.start()
 
         likes = likes_parent.recv()
@@ -70,6 +71,24 @@ def main(argv):
 
         proc_like.join()
         proc_comm.join()
+
+        comments_with_both = [x for x in comms if x[0] in likes]
+        people_to_chose = []
+        
+        if (not allow_duplicates):
+            for comment in comments_with_both:
+                if comment[0] in people_to_chose:
+                    excluded_accounts.add(comment[0])
+                else:
+                    people_to_chose.append(comment[0])
+
+        comments_to_chose = [x for x in comments_with_both if x[0] not in excluded_accounts]
+
+        print(comments_to_chose)
+
+        print(f"There is {len(comments_to_chose)} people...")
+
+
     else:
         ig = Giveaway(LOGIN, PASSWORD, tag_ammount, post_link)
         ig.login()
@@ -78,23 +97,11 @@ def main(argv):
         if(require_comments):
             print('Getting people who commented and tagged {} friends'.format(tag_ammount))
             comms = ig.get_comments()
-            likes = comms
         elif(require_likes):
             print('Getting people who liked post...')
             likes = ig.get_people_who_liked()
-            comms = likes
 
         ig.close_browser()
-
-
-    if (allow_duplicates):
-        people_to_chose = [x for x in comms if x in likes]
-    else:
-        people_to_chose = list(set(comms) & set(likes))
-    
-    people_to_chose = [x for x in people_to_chose if x not in excluded_accounts]
-
-    print(f"There is {len(people_to_chose)} people...")
 
     print(f"Picking winners...")
     if (winners_ammount < len(people_to_chose)):
@@ -117,6 +124,7 @@ def get_likes(pipe, post_link):
     pipe.send(people_who_liked)
     pipe.close()
     ig.close_browser()
+    print("There are {} likes in the post".format(len(people_who_liked)))
 
 
 def get_comments(pipe, tags, post_link):
@@ -129,6 +137,7 @@ def get_comments(pipe, tags, post_link):
     pipe.send(people_who_commented)
     pipe.close()
     ig.close_browser()
+    print("There are {} comments in the post".format(len(people_who_commented)))
 
 
 if __name__ == '__main__':
